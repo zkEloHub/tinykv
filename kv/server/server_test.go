@@ -210,11 +210,11 @@ func TestRawScan1(t *testing.T) {
 
 	cf := engine_util.CfDefault
 
-	Set(s, cf, []byte{1}, []byte{233, 1})
-	Set(s, cf, []byte{2}, []byte{233, 2})
-	Set(s, cf, []byte{3}, []byte{233, 3})
-	Set(s, cf, []byte{4}, []byte{233, 4})
-	Set(s, cf, []byte{5}, []byte{233, 5})
+	assert.Equal(t, nil, Set(s, cf, []byte{1}, []byte{233, 1}))
+	assert.Equal(t, nil, Set(s, cf, []byte{2}, []byte{233, 2}))
+	assert.Equal(t, nil, Set(s, cf, []byte{3}, []byte{233, 3}))
+	assert.Equal(t, nil, Set(s, cf, []byte{4}, []byte{233, 4}))
+	assert.Equal(t, nil, Set(s, cf, []byte{5}, []byte{233, 5}))
 
 	req := &kvrpcpb.RawScanRequest{
 		StartKey: []byte{1},
