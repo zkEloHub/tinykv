@@ -123,6 +123,7 @@ type Raft struct {
 	State StateType
 
 	// votes records
+	// key: id
 	votes map[uint64]bool
 
 	// msgs need to send
@@ -165,7 +166,22 @@ func newRaft(c *Config) *Raft {
 		panic(err.Error())
 	}
 	// Your Code Here (2A).
-	return nil
+	peerLen := len(c.peers)
+	raft := &Raft{
+		id:               c.ID,
+		RaftLog:          newLog(c.Storage),
+		Prs:              make(map[uint64]*Progress, peerLen),
+		State:            StateFollower,
+		votes:            map[uint64]bool{},
+		heartbeatTimeout: c.HeartbeatTick,
+		electionTimeout:  c.ElectionTick,
+	}
+	for _, peer := range c.peers {
+		raft.Prs[peer] = &Progress{}
+		raft.votes[peer] = false
+	}
+
+	return raft
 }
 
 // sendAppend sends an append RPC with new entries (if any) and the
@@ -207,8 +223,48 @@ func (r *Raft) Step(m pb.Message) error {
 	// Your Code Here (2A).
 	switch r.State {
 	case StateFollower:
+		return r.FollowerStep(m)
 	case StateCandidate:
+		return r.CandidateStep(m)
 	case StateLeader:
+		return r.LeaderStep(m)
+	}
+	return nil
+}
+
+func (r *Raft) FollowerStep(m pb.Message) error {
+	switch m.MsgType {
+	case pb.MessageType_MsgHup: // local: start election or after election timeout
+
+	case pb.MessageType_MsgAppend: // append log entries
+	case pb.MessageType_MsgRequestVote: // request vote
+	case pb.MessageType_MsgHeartbeat: // heartbeat from leader.
+	default:
+	}
+	return nil
+}
+
+func (r *Raft) FollowerElectionTimeout() {
+
+}
+
+func (r *Raft) CandidateStep(m pb.Message) error {
+	switch m.MsgType {
+	case pb.MessageType_MsgRequestVoteResponse: // request vote resp
+	case pb.MessageType_MsgHeartbeat: // heartbeat from leader.
+	default:
+	}
+	return nil
+}
+
+func (r *Raft) LeaderStep(m pb.Message) error {
+	switch m.MsgType {
+	case pb.MessageType_MsgBeat: // local: send heartbeat to followers
+	case pb.MessageType_MsgPropose: // local: append data to leader's log entries
+	case pb.MessageType_MsgAppendResponse: // append log entries resp
+	case pb.MessageType_MsgHeartbeatResponse: // heartbeat resp
+	case pb.MessageType_MsgTransferLeader: // leadership transfer
+	default:
 	}
 	return nil
 }
