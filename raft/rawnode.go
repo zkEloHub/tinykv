@@ -35,7 +35,7 @@ type SoftState struct {
 
 // Ready encapsulates the entries and messages that are ready to read,
 // be saved to stable storage, committed or sent to other peers.
-// All fields in Ready are read-only.
+// All fields in Ready are **read-only**.
 type Ready struct {
 	// The current volatile state of a Node.
 	// SoftState will be nil if there is no update.
@@ -75,7 +75,10 @@ type RawNode struct {
 // NewRawNode returns a new RawNode given configuration and a list of raft peers.
 func NewRawNode(config *Config) (*RawNode, error) {
 	// Your Code Here (2A).
-	return nil, nil
+	node := &RawNode{
+		Raft: newRaft(config),
+	}
+	return node, nil
 }
 
 // Tick advances the internal logical clock by a single tick.

@@ -62,8 +62,7 @@ To restart a node from previous state:
 Now that you are holding onto a Node you have a few responsibilities:
 
 First, you must read from the Node.Ready() channel and process the updates
-it contains. These steps may be performed in parallel, except as noted in step
-2.
+it contains. **These steps may be performed in parallel, except as noted in step 2**.
 
 1. Write HardState, Entries, and Snapshot to persistent storage if they are
 not empty. Note that when writing an Entry with Index i, any
@@ -74,10 +73,10 @@ no messages be sent until the latest HardState has been persisted to disk,
 and all Entries written by any previous Ready batch (Messages may be sent while
 entries from the same batch are being persisted).
 
-Note: Marshalling messages is not thread-safe; it is important that you
+Note: **Marshalling messages is not thread-safe**; it is important that you
 make sure that no new entries are persisted while marshalling.
 The easiest way to achieve this is to serialize the messages directly inside
-your main raft loop.
+your **main raft loop**.
 
 3. Apply Snapshot (if any) and CommittedEntries to the state machine.
 If any committed Entry has Type EntryType_EntryConfChange, call Node.ApplyConfChange()

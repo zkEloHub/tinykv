@@ -56,7 +56,20 @@ type RaftLog struct {
 // to the state that it just commits and applies the latest snapshot.
 func newLog(storage Storage) *RaftLog {
 	// Your Code Here (2A).
-	return nil
+	return &RaftLog{
+		storage:   storage,
+		committed: 0,
+		applied:   0,
+		stabled:   0,
+		// snapshot
+	}
+}
+
+func (l *RaftLog) appendEntries(entries []*pb.Entry) {
+	for _, entry := range entries {
+		l.entries = append(l.entries, *entry)
+	}
+	// TODO: when to stable entries ?
 }
 
 // We need to compact the log entries in some point of time like
@@ -69,23 +82,54 @@ func (l *RaftLog) maybeCompact() {
 // unstableEntries return all the unstable entries
 func (l *RaftLog) unstableEntries() []pb.Entry {
 	// Your Code Here (2A).
-	return nil
+	idx := uint64(len(l.entries) - 1)
+	if l.stabled == idx {
+		return nil
+	}
+	retEnts := make([]pb.Entry, idx-l.stabled)
+	copy(retEnts, l.entries[l.stabled+1:])
+	return retEnts
 }
 
 // nextEnts returns all the committed but not applied entries
-func (l *RaftLog) nextEnts() (ents []pb.Entry) {
+func (l *RaftLog) nextEnts() []pb.Entry {
 	// Your Code Here (2A).
-	return nil
+	if l.committed == l.applied {
+		return nil
+	}
+	retEnts := make([]pb.Entry, l.committed-l.applied)
+	copy(retEnts, l.entries[l.applied+1:])
+	return retEnts
+}
+
+// followerEnts return all entries behind nextIdx (include nextIdx it self)
+func (l *RaftLog) getNextEnts(nextIdx uint64) []*pb.Entry {
+	entryLen := uint64(len(l.entries))
+	if nextIdx <= 0 || nextIdx >= entryLen {
+		return nil
+	}
+	retEnts := make([]*pb.Entry, 0, entryLen-nextIdx)
+	for i := nextIdx; i < entryLen; i++ {
+		retEnts = append(retEnts, &l.entries[i])
+	}
+	return retEnts
 }
 
 // LastIndex return the last index of the log entries
 func (l *RaftLog) LastIndex() uint64 {
 	// Your Code Here (2A).
-	return 0
+	entryLen := len(l.entries)
+	if entryLen == 0 {
+		return 0
+	}
+	return l.entries[entryLen-1].Index
 }
 
 // Term return the term of the entry in the given index
 func (l *RaftLog) Term(i uint64) (uint64, error) {
 	// Your Code Here (2A).
-	return 0, nil
+	if i < 0 || i >= uint64(len(l.entries)) {
+		return 0, InvalidLogIndexErr
+	}
+	return l.entries[i].Term, nil
 }
