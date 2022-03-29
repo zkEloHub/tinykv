@@ -72,6 +72,25 @@ func (l *RaftLog) appendEntries(entries []*pb.Entry) {
 	// TODO: when to stable entries ?
 }
 
+// appendEntrySafely append one entry, and will handle entry conflicts
+func (l *RaftLog) appendEntrySafely(entry *pb.Entry) bool {
+	idx := int(entry.Index)
+	if idx == len(l.entries) {
+		l.entries = append(l.entries, *entry)
+		return true
+	}
+	// invalid
+	if idx > len(l.entries) {
+		return false
+	}
+	// conflicts, remove it and all entries that follower it
+	if l.entries[entry.Index].Term != entry.Term {
+		l.entries = l.entries[entry.Index:]
+		l.entries[entry.Index] = *entry
+	}
+	return true
+}
+
 // We need to compact the log entries in some point of time like
 // storage compact stabled log entries prevent the log entries
 // grow unlimitedly in memory
@@ -105,7 +124,7 @@ func (l *RaftLog) nextEnts() []pb.Entry {
 // followerEnts return all entries behind nextIdx (include nextIdx it self)
 func (l *RaftLog) getNextEnts(nextIdx uint64) []*pb.Entry {
 	entryLen := uint64(len(l.entries))
-	if nextIdx <= 0 || nextIdx >= entryLen {
+	if nextIdx < 0 || nextIdx >= entryLen {
 		return nil
 	}
 	retEnts := make([]*pb.Entry, 0, entryLen-nextIdx)
