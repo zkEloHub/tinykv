@@ -366,7 +366,7 @@ func TestLeaderStartReplication2AB(t *testing.T) {
 	r.becomeCandidate()
 	r.becomeLeader()
 	commitNoopEntry(r, s)
-	li := r.RaftLog.LastIndex()
+	li := r.RaftLog.LastIndex() // 1
 
 	ents := []*pb.Entry{{Data: []byte("some data")}}
 	r.Step(pb.Message{From: 1, To: 1, MsgType: pb.MessageType_MsgPropose, Entries: ents})
@@ -902,7 +902,8 @@ func commitNoopEntry(r *Raft, s *MemoryStorage) {
 	msgs := r.readMessages()
 	for _, m := range msgs {
 		if m.MsgType != pb.MessageType_MsgAppend || len(m.Entries) != 1 || m.Entries[0].Data != nil {
-			panic("not a message to append noop entry")
+			panicInfo := fmt.Sprintf("not a message to append noop entry. len(Entries) = %d\n", len(m.Entries))
+			panic(panicInfo)
 		}
 		r.Step(acceptAndReply(m))
 	}

@@ -980,7 +980,7 @@ func TestRecvMessageType_MsgBeat2AA(t *testing.T) {
 func TestLeaderIncreaseNext2AB(t *testing.T) {
 	previousEnts := []pb.Entry{{Term: 1, Index: 1}, {Term: 1, Index: 2}, {Term: 1, Index: 3}}
 	// previous entries + noop entry + propose + 1
-	wnext := uint64(len(previousEnts)) + 1 + 1 + 1
+	wnext := uint64(len(previousEnts)) + 1 + 1 + 1 // 6
 
 	storage := NewMemoryStorage()
 	storage.Append(previousEnts)

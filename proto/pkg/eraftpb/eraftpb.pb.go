@@ -345,7 +345,7 @@ type Message struct {
 	From                 uint64      `protobuf:"varint,3,opt,name=from,proto3" json:"from,omitempty"`
 	Term                 uint64      `protobuf:"varint,4,opt,name=term,proto3" json:"term,omitempty"`
 	LogTerm              uint64      `protobuf:"varint,5,opt,name=log_term,json=logTerm,proto3" json:"log_term,omitempty"`
-	Index                uint64      `protobuf:"varint,6,opt,name=index,proto3" json:"index,omitempty"`
+	Index                uint64      `protobuf:"varint,6,opt,name=index,proto3" json:"index,omitempty"` // Index of which entry is match/dismatch
 	Entries              []*Entry    `protobuf:"bytes,7,rep,name=entries" json:"entries,omitempty"`
 	Commit               uint64      `protobuf:"varint,8,opt,name=commit,proto3" json:"commit,omitempty"`
 	Snapshot             *Snapshot   `protobuf:"bytes,9,opt,name=snapshot" json:"snapshot,omitempty"`
